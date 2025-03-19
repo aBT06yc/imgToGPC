@@ -23,16 +23,31 @@ class MainWindow(QMainWindow):
         #self.colourBox. activated.connect(self.doPrint)
         
         self.fileButton.clicked.connect(self.selectFile)
-        self.blackBorderSlider.valueChanged.connect(self.doPrint)
+        self.clipboardButton.clicked.connect(self.load_image_from_clipboard)
+
+        self.blackBorderMinSlider.valueChanged.connect(self.doPrint)
+        self.blackBorderMaxSlider.valueChanged.connect(self.doPrint)
         self.makeGPCButton.clicked.connect(self.makeGPC)
         self.copyButton.clicked.connect(self.copyText)
 
         self.canny.stateChanged.connect(self.doPrint)
         self.tLower.valueChanged.connect(self.doPrint)
         self.tUpper.valueChanged.connect(self.doPrint)
+        self.cannyTypeBox.currentIndexChanged.connect(self.doPrint)
+
+    def load_image_from_clipboard(self):
+        clipboard = QApplication.clipboard()
+        pixmap = clipboard.pixmap()  # Получаем изображение из буфера
+        if not pixmap.isNull():
+            pixmap.save("clipboard.png")
+            self.fileName = "./clipboard.png"
+            self.doPrint()
+            #print(pixmap)
+        else:
+            print("Not a image in clipboard")
 
     def selectFile(self):
-        self.fileName = QFileDialog.getOpenFileName(self,"Choose image", "", "Image Files (*.jfif *.png *.jpg *.jpeg *.bmp *.tiff *.tif)")
+        self.fileName = QFileDialog.getOpenFileName(self,"Choose image", "", "Image Files (*.jfif *.png *.jpg *.jpeg *.bmp *.tiff *.tif)")[0]
         self.doPrint()
 
     def doPrint(self):
@@ -44,18 +59,20 @@ class MainWindow(QMainWindow):
         tUpper = int(self.tUpper.value())
         x = int(self.xBox.text())
         y = int(self.yBox.text())   
-        black_border = int(self.blackBorderSlider.value())
+        black_border_max = int(self.blackBorderMaxSlider.value())
+        black_border_min = int(self.blackBorderMinSlider.value())
+        canny_type = self.cannyTypeBox.currentText()
 
         try:
-            try:file = str(self.fileName[0])
+            try:file = str(self.fileName)
             except: print("Select your img file!")
 
-            black = make_picture(file,x,y,black_border,invColour,canny,tLower,tUpper)
+            black = make_picture(file,x,y,black_border_min,black_border_max,invColour,canny,tLower,tUpper,canny_type)
 
             self.blackLable.setText(f"{black:.2f} %") 
             self.recLable.setText(f"{"make with black" if black < 50 else "make with white"}") 
 
-            pixmap =  QtGui.QPixmap('example.jpg')
+            pixmap =  QtGui.QPixmap('example.tiff')
             self.image.setPixmap(pixmap)  
         
         except Exception as _ex:
@@ -63,14 +80,16 @@ class MainWindow(QMainWindow):
             
         
     def makeGPC(self):
+
         colour = self.colourBox.currentText()
         x = int(self.xBox.text())
         y = int(self.yBox.text()) 
-        black_border = int(self.blackBorderSlider.value())
+        black_border_min = int(self.blackBorderMinSlider.value())
+        black_border_max = int(self.blackBorderMaxSlider.value())
         optimization = self.optimization.isChecked()
 
         try:
-            make_gpc(x,y,colour,black_border,optimization)
+            make_gpc(x,y,colour,black_border_min,black_border_max,optimization)
             with open("myScript.gpc", "r") as file:
                 text = file.read()
             self.gpcText.setText(text)
