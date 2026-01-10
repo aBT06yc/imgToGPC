@@ -5,6 +5,8 @@ convert images for cronus Zen (.gpc) format
 
 **How to use** (windows)
 
+IF YOU ARE NOT A PROGRAMMER USE EXE version.   -->>   https://github.com/aBT06yc/img2GPC/releases/tag/v0.3
+
 1. dowload python LOL _(py 3.12 would be good)_ 
 
    https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe
